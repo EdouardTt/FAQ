@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ Support — Avis-Locataire</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #1B2A4A;
+    --primary-light: #2C3E6B;
+    --accent: #3B82F6;
+    --accent-light: #DBEAFE;
+    --bg: #F1F5F9;
+    --card: #FFFFFF;
+    --text: #1E293B;
+    --text-light: #64748B;
+    --border: #E2E8F0;
+    --success: #10B981;
+    --highlight: #FEF3C7;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    padding: 2rem 1.5rem 3.5rem;
+    text-align: center;
+    position: relative;
+  }
+  .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .header p { font-size: 0.9rem; opacity: 0.8; }
+
+  .search-container {
+    max-width: 640px;
+    margin: -1.75rem auto 0;
+    padding: 0 1.5rem;
+    position: relative;
+    z-index: 10;
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    padding: 0.25rem 1rem;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus-within { border-color: var(--accent); }
+  .search-icon { color: var(--text-light); flex-shrink: 0; }
+  .search-box input {
+    flex: 1; border: none; outline: none;
+    padding: 0.85rem 0.75rem; font-size: 1rem;
+    font-family: inherit; background: transparent; color: var(--text);
+  }
+  .search-box input::placeholder { color: var(--text-light); }
+  .clear-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-light); padding: 4px; border-radius: 50%;
+    display: none; transition: color 0.2s;
+  }
+  .clear-btn:hover { color: var(--text); }
+  .clear-btn.visible { display: block; }
+
+  .search-stats {
+    text-align: center; margin-top: 0.75rem;
+    font-size: 0.85rem; color: var(--text-light); min-height: 1.25rem;
+  }
+
+  .categories-nav {
+    max-width: 900px; margin: 1.5rem auto 0; padding: 0 1.5rem;
+    display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+  }
+  .cat-pill {
+    padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem;
+    font-weight: 500; cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--card); color: var(--text-light);
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .cat-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .cat-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .cat-pill .count {
+    display: inline-block; background: rgba(0,0,0,0.08);
+    border-radius: 10px; padding: 0 6px; font-size: 0.7rem; margin-left: 4px;
+  }
+  .cat-pill.active .count { background: rgba(255,255,255,0.25); }
+
+  .content { max-width: 800px; margin: 1.5rem auto 3rem; padding: 0 1.5rem; }
+
+  .section { margin-bottom: 1.5rem; }
+  .section-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 0; cursor: pointer; user-select: none;
+  }
+  .section-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .section-title { font-size: 1.05rem; font-weight: 600; flex: 1; }
+  .section-count {
+    font-size: 0.75rem; color: var(--text-light);
+    background: var(--bg); padding: 2px 8px; border-radius: 10px;
+  }
+
+  .faq-item {
+    background: var(--card); border-radius: 10px; margin-bottom: 0.5rem;
+    border: 1px solid var(--border); overflow: hidden; transition: box-shadow 0.2s;
+  }
+  .faq-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .faq-item.highlight { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .faq-question {
+    display: flex; align-items: center; padding: 0.85rem 1rem;
+    cursor: pointer; user-select: none; gap: 0.75rem;
+  }
+  .faq-question .q-icon { color: var(--accent); font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .faq-question .q-text { flex: 1; font-weight: 500; font-size: 0.92rem; }
+  .faq-question .chevron { color: var(--text-light); transition: transform 0.25s; flex-shrink: 0; }
+  .faq-item.open .faq-question .chevron { transform: rotate(180deg); }
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .faq-item.open .faq-answer { max-height: 1200px; }
+  .faq-answer-inner {
+    padding: 0 1rem 1rem 2.75rem; font-size: 0.88rem;
+    color: var(--text-light); line-height: 1.7;
+  }
+
+  mark { background: var(--highlight); color: inherit; padding: 1px 2px; border-radius: 2px; }
+
+  .no-results { text-align: center; padding: 3rem 1rem; color: var(--text-light); }
+  .no-results .emoji { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .no-results p { font-size: 0.95rem; }
+
+  .footer { text-align: center; padding: 1.5rem; font-size: 0.8rem; color: var(--text-light); }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.35rem; }
+    .categories-nav { gap: 0.35rem; }
+    .cat-pill { font-size: 0.72rem; padding: 0.3rem 0.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>FAQ Support — Avis-Locataire</h1>
+  <p>920 tickets analysés • 13 catégories • Guide détaillé</p>
+</div>
+
+<div class="search-container">
+  <div class="search-box">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Rechercher dans la FAQ…" autocomplete="off">
+    <button class="clear-btn" id="clearBtn" aria-label="Effacer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="search-stats" id="searchStats"></div>
+</div>
+
+<div class="categories-nav" id="categoriesNav"></div>
+
+<div class="content" id="faqContent"></div>
+
+<div class="footer">FAQ générée le 27/02/2026 — Analyse de 920 tickets HubSpot + Guides utilisateurs</div>
+
+<script>
+const faqData = [
+  {
+    id: 1, title: "Connexion et tableau de bord", icon: "🏠",
+    color: "#EFF6FF", iconBg: "#DBEAFE",
+    items: [
+      { q: "Comment se connecter à la plateforme Avis-Locataire ?", a: "Rendez-vous sur <strong>app.avis-locataire.com</strong>. Saisissez votre adresse email et votre mot de passe, puis cliquez sur <strong>Connexion</strong>. Si votre organisme utilise le SSO (Single Sign-On), cliquez sur le bouton dédié pour vous authentifier via votre annuaire d'entreprise." },
+      { q: "J'ai oublié mon mot de passe — comment le réinitialiser ?", a: "Sur la page de connexion, cliquez sur <strong>« Mot de passe oublié »</strong>. Saisissez votre adresse email et validez. Vous recevrez un lien de réinitialisation par email (vérifiez vos spams). Cliquez sur le lien, définissez un nouveau mot de passe et reconnectez-vous. Si vous ne recevez pas l'email après 5 minutes, contactez le support." },
+      { q: "Que contient le tableau de bord ?", a: "Le tableau de bord affiche en un coup d'œil : le <strong>taux de satisfaction global</strong> (note moyenne), le <strong>taux de réponse</strong> aux enquêtes, le <strong>NPS (Net Promoter Score)</strong>, la <strong>répartition des notes</strong> par catégorie (1 à 5 étoiles), et un graphique d'évolution dans le temps. Vous pouvez filtrer ces indicateurs par <strong>période, agence, résidence, gardien ou prestataire</strong> grâce aux menus déroulants en haut de page." },
+      { q: "Le tableau de bord ne se charge pas ou affiche une page blanche", a: "Essayez de vider le cache de votre navigateur (Ctrl+Maj+Suppr), puis rechargez la page. Utilisez de préférence Chrome ou Edge à jour. Si le problème persiste, vérifiez que vous n'utilisez pas un VPN ou un pare-feu qui bloque l'accès à app.avis-locataire.com, et contactez le support." },
+      { q: "Comment naviguer dans les menus principaux ?", a: "Le menu latéral gauche donne accès aux modules : <strong>Enquêtes</strong> (suivi et résultats), <strong>Communication</strong> (SMS/email), <strong>Réclamations</strong>, <strong>RDV</strong> (rendez-vous), <strong>Alertes</strong>, et <strong>Reporting</strong>. Cliquez sur un module pour le déployer, puis sélectionnez le sous-menu souhaité." },
+      { q: "Comment mettre en place le SSO (Single Sign-On) ?", a: "La mise en place du SSO nécessite une coordination entre votre DSI et l'équipe Avis-Locataire. Contactez le support pour initier le processus. Votre DSI devra fournir les métadonnées SAML ou OpenID Connect de votre fournisseur d'identité." }
+    ]
+  },
+  {
+    id: 2, title: "Enquêtes de satisfaction", icon: "📊",
+    color: "#EFF6FF", iconBg: "#DBEAFE",
+    items: [
+      { q: "Comment créer une nouvelle enquête ?", a: "Contactez le support en précisant : <strong>1)</strong> Le type d'enquête (entrants, sortants, DIT, satisfaction globale, propreté, post-sinistre, post-travaux…). <strong>2)</strong> Le texte du questionnaire et les questions à poser. <strong>3)</strong> Le mode d'envoi (SMS, email, ou les deux). <strong>4)</strong> Les dates de lancement et de relance éventuelle. <strong>5)</strong> Le fichier des destinataires au format Excel (nom, prénom, téléphone et/ou email, résidence, n° de logement)." },
+      { q: "Comment consulter le suivi d'une enquête en cours ?", a: "Allez dans <strong>Enquêtes > Suivi</strong>. Deux vues sont disponibles : <strong>Vue mensuelle</strong> : affiche les envois regroupés par mois avec le nombre de destinataires, de réponses et le taux de réponse. <strong>Vue par envoi</strong> : liste chaque envoi individuel avec ses détails. Utilisez les filtres en haut (période, agence, résidence, gardien, prestataire) pour affiner. Cliquez sur une ligne pour voir le détail d'un envoi spécifique : nombre de SMS/emails envoyés, délivrés, ouverts et répondus." },
+      { q: "Comment consulter les résultats d'une enquête ?", a: "Allez dans <strong>Enquêtes > Résultats</strong>. Vous y trouverez : les <strong>scores de satisfaction globaux</strong> (note moyenne, NPS), la <strong>répartition par note</strong> (1 à 5), les résultats <strong>question par question</strong>, et les <strong>verbatims</strong> (commentaires libres des locataires). Filtrez par période, agence, résidence, gardien ou prestataire pour des analyses ciblées." },
+      { q: "Comment exporter les résultats d'une enquête ?", a: "Depuis l'onglet <strong>Résultats</strong>, cliquez sur le bouton <strong>Exporter</strong> (icône de téléchargement). Vous obtiendrez un fichier Excel contenant l'ensemble des réponses, les scores par question, et les verbatims. Vous pouvez aussi demander un export personnalisé au support." },
+      { q: "Comment envoyer le fichier de destinataires ?", a: "Deux options : <strong>1)</strong> Déposez votre fichier Excel (XLS/XLSX) sur le serveur FTP via FileZilla (identifiants fournis par le support). <strong>2)</strong> Envoyez le fichier par email au support. Le fichier doit contenir au minimum : nom, prénom, téléphone mobile (pour SMS) ou email, et identifiant du logement/résidence." },
+      { q: "Pourquoi y a-t-il un écart entre destinataires envoyés et contactés ?", a: "Plusieurs causes possibles : <strong>numéros de téléphone invalides</strong> (format incorrect, ligne fixe au lieu de mobile), <strong>adresses email erronées</strong> (faute de frappe, boîte pleine), <strong>doublons</strong> dans le fichier source, ou <strong>locataires désinscrits</strong> (ayant cliqué sur le lien de désinscription). Vérifiez votre fichier source et contactez le support pour obtenir la liste des exclusions." },
+      { q: "Comment relancer une enquête ?", a: "Contactez le support en indiquant le nom de l'enquête et la date de relance souhaitée. La relance ciblera automatiquement les destinataires <strong>n'ayant pas encore répondu</strong>. Elle peut être envoyée par SMS, email ou les deux." },
+      { q: "Comment mettre en place une enquête en Libre Accès (QR Code) ?", a: "Le module <strong>Libre Accès</strong> permet de créer des enquêtes accessibles via un QR Code (affichable dans les halls d'immeubles, les espaces communs, etc.). Contactez le support en précisant : le questionnaire souhaité, les résidences/sites concernés et le support d'affichage. L'équipe vous fournira les QR Codes à imprimer." },
+      { q: "Les filtres de mon enquête ne donnent pas des résultats cohérents", a: "Des incohérences entre les totaux filtrés et le total général peuvent apparaître si le paramétrage des filtres (agence, résidence, gardien) ne correspond pas exactement aux données du fichier source. Signalez le problème au support avec des <strong>captures d'écran</strong> montrant les chiffres incohérents. L'équipe vérifiera le mapping des données." },
+      { q: "Peut-on limiter le délai de réponse d'une enquête ?", a: "Oui. Vous pouvez configurer une <strong>date de clôture</strong> après laquelle le lien de l'enquête ne sera plus actif, ou définir un <strong>nombre de jours</strong> après l'envoi au-delà duquel les réponses ne sont plus acceptées. Précisez votre souhait au support lors de la création de l'enquête." },
+      { q: "Comment suspendre temporairement les envois d'enquêtes ?", a: "Envoyez une demande au support en précisant la <strong>date de suspension</strong> et la <strong>date de reprise</strong>. Tous les envois programmés seront gelés pendant cette période (utile pendant les vacances ou travaux majeurs)." },
+      { q: "Comment obtenir un modèle de questionnaire type ?", a: "Le support peut vous fournir des modèles pré-configurés : satisfaction globale, enquête entrants, enquête sortants, propreté, post-sinistre, DIT (Diagnostic en Tension), post-travaux. Indiquez le type souhaité et le support vous enverra le modèle avec les questions standards." }
+    ]
+  },
+  {
+    id: 3, title: "Application Collecte", icon: "📱",
+    color: "#F0FDF4", iconBg: "#DCFCE7",
+    items: [
+      { q: "Comment installer et se connecter à l'application Collecte ?", a: "Téléchargez l'application <strong>Avis-Locataire Collecte</strong> depuis le Play Store (Android) ou l'App Store (iOS). Lancez l'application et saisissez vos identifiants (email + mot de passe fournis par le support). Lors de la première connexion, l'application effectuera une <strong>synchronisation initiale</strong> pour télécharger votre base patrimoine (résidences, bâtiments, logements). Cette synchronisation peut prendre quelques minutes selon le volume de données." },
+      { q: "Comment synchroniser les données de l'application ?", a: "Appuyez sur le bouton <strong>Synchroniser</strong> (icône de flèches circulaires) dans le menu principal. La synchronisation envoie les données collectées (inspections, photos, observations) vers le serveur et récupère les éventuelles mises à jour du patrimoine. <strong>Important</strong> : vous devez être connecté à internet (Wi-Fi ou 4G/5G) pour synchroniser. Un indicateur vous montre le nombre d'éléments en attente de synchronisation." },
+      { q: "Comment créer une nouvelle inspection / visite ?", a: "Dans l'application, naviguez dans l'arborescence : <strong>Résidence > Bâtiment > Logement</strong> (ou espace commun). Appuyez sur <strong>Nouvelle inspection</strong>. Sélectionnez le type d'inspection (état des lieux, visite technique, contrôle propreté…). Vous pouvez ensuite parcourir les pièces/équipements et saisir vos observations, prendre des photos et attribuer des notes." },
+      { q: "Comment prendre des photos dans Collecte ?", a: "Lors d'une inspection, appuyez sur l'icône <strong>appareil photo</strong> pour prendre une photo standard. Vous pouvez aussi réaliser des <strong>photos panoramiques 360°</strong> en appuyant sur l'icône dédiée (sphère). Pour les photos 360°, suivez les instructions à l'écran pour pivoter lentement sur vous-même. Les photos sont rattachées automatiquement à l'élément inspecté (pièce, équipement)." },
+      { q: "L'application fonctionne-t-elle hors connexion ?", a: "Oui, Collecte dispose d'un <strong>mode hors-ligne</strong>. Vous pouvez réaliser vos inspections, prendre des photos et saisir des observations sans connexion internet. Les données sont stockées localement sur l'appareil. Dès que vous retrouvez une connexion, appuyez sur <strong>Synchroniser</strong> pour envoyer toutes les données en attente vers le serveur." },
+      { q: "L'application ne synchronise plus — que faire ?", a: "Vérifiez votre connexion internet (Wi-Fi ou données mobiles activées). Fermez complètement l'application et relancez-la. Si le problème persiste, contactez le support en indiquant : votre <strong>email de connexion</strong>, la <strong>version de l'application</strong> (visible dans Paramètres > À propos), le <strong>modèle de votre appareil</strong> (ex : Samsung Galaxy A54, iPhone 14), et une <strong>capture d'écran</strong> de l'erreur éventuelle." },
+      { q: "Les photos ne s'enregistrent pas après la prise de vue", a: "Bug connu sur certaines versions Android. <strong>Solutions</strong> : 1) Mettez à jour l'application depuis le Play Store. 2) Vérifiez que l'application a les autorisations caméra et stockage (Paramètres Android > Applications > Collecte > Autorisations). 3) En contournement temporaire, prenez la photo depuis la galerie du téléphone puis importez-la dans l'application via le bouton <strong>Importer une photo</strong>." },
+      { q: "Les photos 360° ne se chargent pas correctement", a: "Vérifiez que vous utilisez la <strong>dernière version</strong> de l'application (ce bug a été corrigé dans les versions récentes). Assurez-vous également que votre appareil dispose d'assez d'espace de stockage (les photos 360° sont volumineuses, ~15-30 Mo chacune). Si le problème persiste, contactez le support avec la version exacte de l'application." },
+      { q: "J'ai une erreur 500 sur Collecte", a: "Une erreur 500 indique un <strong>problème serveur</strong>. Contactez immédiatement le support en indiquant l'heure exacte de l'erreur et une capture d'écran. L'équipe technique intervient généralement dans l'heure. En attendant, vos données locales (non synchronisées) ne sont pas perdues." },
+      { q: "Comment créer un nouveau compte utilisateur sur Collecte ?", a: "Envoyez au support : <strong>nom et prénom</strong> de l'utilisateur, son <strong>adresse email</strong>, son <strong>rôle</strong> (opérateur = terrain, gestionnaire = supervision, lecteur = consultation seule), et les <strong>patrimoines/collectes</strong> à lui rattacher. Le support créera le compte et l'utilisateur recevra ses identifiants par email." },
+      { q: "Le message « adresse email non disponible » apparaît lors de la création d'un compte", a: "L'email est déjà utilisé par un autre compte (éventuellement un compte désactivé ou supprimé). Contactez le support pour <strong>débloquer l'adresse</strong> ou la réattribuer à un nouveau compte." },
+      { q: "Comment mettre à jour la base patrimoine dans Collecte ?", a: "Préparez votre fichier de patrimoine mis à jour (format Excel, avec les colonnes : référence résidence, bâtiment, logement, adresse, etc.). Déposez-le sur le <strong>serveur FTP</strong> et prévenez le support. Après intégration, les utilisateurs devront <strong>synchroniser</strong> leur application pour voir les changements." },
+      { q: "La synchronisation initiale est très lente", a: "La première synchronisation peut être longue si votre base patrimoine est volumineuse (plusieurs milliers de logements). Connectez-vous en <strong>Wi-Fi</strong> plutôt qu'en 4G. Si la synchronisation dépasse 15 minutes, contactez le support pour vérifier si une optimisation de votre base est possible." }
+    ]
+  },
+  {
+    id: 4, title: "Comptes et accès", icon: "🔑",
+    color: "#FEF3C7", iconBg: "#FDE68A",
+    items: [
+      { q: "Comment créer un compte utilisateur sur la plateforme web ?", a: "Envoyez au support les informations suivantes : <strong>nom, prénom, email, fonction</strong> dans l'organisme, <strong>rôle souhaité</strong> (administrateur = accès complet + gestion des utilisateurs, contributeur = accès aux modules métier, lecteur = consultation seule), et les <strong>organisations/entités</strong> à rattacher (agences, résidences…)." },
+      { q: "Comment modifier le rôle ou les droits d'un utilisateur ?", a: "Envoyez la demande au support en précisant : le <strong>nom et email</strong> de l'utilisateur, son <strong>rôle actuel</strong> et le <strong>nouveau rôle</strong> souhaité. Les rôles disponibles sont : administrateur, contributeur, lecteur (plateforme web) ou opérateur, gestionnaire, lecteur (application Collecte)." },
+      { q: "Comment supprimer ou désactiver un compte ?", a: "Contactez le support avec le nom et l'email du compte à désactiver. Le compte sera désactivé (et non supprimé) afin de conserver l'historique des actions. L'utilisateur ne pourra plus se connecter." },
+      { q: "Comment ajouter/supprimer un destinataire des rapports ou alertes automatiques ?", a: "Envoyez au support le <strong>nom et email</strong> de la personne, et précisez les types de mails concernés : alertes de satisfaction, rapports hebdomadaires, résultats d'enquêtes mensuels, rapports de réclamations, etc." },
+      { q: "Je suis dans la liste des désinscrits alors que je n'ai rien demandé", a: "Cela arrive si un clic accidentel sur le lien <strong>« Se désinscrire »</strong> en bas d'un email a été effectué. Contactez le support pour être réinscrit. Pour éviter cela, les utilisateurs internes peuvent être protégés contre la désinscription automatique." },
+      { q: "Comment obtenir les identifiants FTP (FileZilla) ?", a: "Contactez le support pour recevoir les identifiants de connexion au serveur FTP. Vous aurez besoin de : l'<strong>adresse du serveur</strong>, le <strong>nom d'utilisateur</strong>, le <strong>mot de passe</strong> et le <strong>port</strong> (généralement 21 ou 22). Le FTP sert à déposer les fichiers de destinataires d'enquêtes et les mises à jour de patrimoine." }
+    ]
+  },
+  {
+    id: 5, title: "SMS et Communications", icon: "💬",
+    color: "#EDE9FE", iconBg: "#DDD6FE",
+    items: [
+      { q: "Comment créer et envoyer une campagne de communication ?", a: "Depuis le menu <strong>Communication</strong>, cliquez sur <strong>Nouvelle campagne</strong>. Choisissez le canal (SMS ou email). Rédigez votre message (160 caractères max pour un SMS simple, possibilité de SMS longs). Importez ou sélectionnez vos destinataires depuis la base. Choisissez la date et l'heure d'envoi (immédiat ou programmé). Prévisualisez et validez. Vous pouvez aussi utiliser des <strong>modèles (templates)</strong> pré-enregistrés." },
+      { q: "Mon stock de SMS est épuisé — comment le recharger ?", a: "Contactez le support en demandant une <strong>incrémentation de votre solde SMS</strong>. Précisez le nombre de SMS souhaité (par tranche : 5 000, 10 000, 20 000…). Le renouvellement sera facturé selon les conditions de votre contrat." },
+      { q: "Comment consulter ma consommation de SMS ?", a: "Dans le module <strong>Communication</strong>, un compteur affiche votre solde SMS restant. Pour un <strong>historique détaillé</strong> de consommation (nombre de SMS par campagne, par mois), demandez un export au support." },
+      { q: "Comment gérer les contacts / listes de destinataires ?", a: "Le module Communication permet de gérer vos <strong>listes de contacts</strong> : importer des contacts depuis un fichier Excel, créer des segments (par résidence, agence, etc.), et gérer les désinscrits. Les contacts avec des numéros invalides ou ayant demandé la désinscription sont automatiquement exclus des envois." },
+      { q: "Comment annuler un envoi de communication programmé ?", a: "Contactez le support <strong>en urgence</strong> avec le nom de la communication à annuler et l'heure d'envoi prévue. Si l'envoi n'a pas encore été déclenché, il peut être stoppé. Les envois déjà en cours ne peuvent pas être rappelés." },
+      { q: "Peut-on obtenir un export de l'historique des SMS envoyés ?", a: "Oui. Le support peut générer un fichier Excel avec l'<strong>historique complet des SMS</strong> envoyés sur une période donnée : date, heure, destinataire, contenu, statut de livraison (délivré, échoué, en attente)." },
+      { q: "Un SMS a été envoyé avec le mauvais contenu ou au mauvais format", a: "Si vous avez sélectionné le mauvais mode d'envoi ou le mauvais modèle, contactez le support pour identifier les destinataires impactés. Un correctif (nouvel envoi avec le bon contenu, message d'excuse) peut être mis en place rapidement." }
+    ]
+  },
+  {
+    id: 6, title: "Module Rendez-vous (RDV)", icon: "📅",
+    color: "#FDF2F8", iconBg: "#FBCFE8",
+    items: [
+      { q: "Comment accéder au module RDV ?", a: "Dans le menu latéral, cliquez sur <strong>RDV</strong>. Vous accédez à la vue calendrier qui affiche tous les rendez-vous planifiés. Trois vues sont disponibles : <strong>jour, semaine, mois</strong>. Utilisez les flèches pour naviguer entre les dates." },
+      { q: "Comment créer des types de rendez-vous ?", a: "Accédez à <strong>RDV > Configuration > Types de RDV</strong>. Cliquez sur <strong>Nouveau type</strong>. Définissez : le <strong>nom</strong> du type (ex : « État des lieux entrant », « Réclamation technique »), la <strong>durée par défaut</strong> (15, 30, 45, 60 min), le <strong>lieu</strong>, et éventuellement un <strong>message SMS personnalisé</strong> envoyé au locataire à la confirmation." },
+      { q: "Comment créer des créneaux de rendez-vous ?", a: "Allez dans <strong>RDV > Créneaux</strong>. Cliquez sur <strong>Nouveau créneau</strong>. Renseignez : le <strong>site/résidence</strong> concerné, les <strong>dates et horaires</strong> disponibles, la <strong>durée</strong> de chaque créneau (ex : 15 min), le <strong>nombre maximum de RDV</strong> par créneau, et le <strong>type de RDV</strong> associé. Les créneaux créés seront proposés aux locataires lors de la prise de rendez-vous." },
+      { q: "Comment un locataire prend-il rendez-vous ?", a: "Le locataire reçoit un <strong>SMS ou email</strong> contenant un lien vers la page de prise de RDV. Il sélectionne le créneau qui lui convient parmi ceux disponibles, confirme ses coordonnées et valide. Il reçoit ensuite un <strong>SMS de confirmation</strong> avec la date, l'heure et le lieu du rendez-vous." },
+      { q: "Comment gérer les rendez-vous (confirmer, annuler, reporter) ?", a: "Depuis la vue calendrier, cliquez sur un RDV pour accéder à son détail. Vous pouvez : <strong>Confirmer</strong> le RDV (un SMS de confirmation est envoyé au locataire), <strong>Annuler</strong> le RDV (un SMS d'annulation est envoyé), <strong>Reporter</strong> à un autre créneau. Chaque changement de statut peut déclencher une <strong>notification SMS automatique</strong> au locataire." },
+      { q: "Quelles notifications SMS sont envoyées pour les RDV ?", a: "Plusieurs notifications automatiques sont configurables : <strong>Confirmation</strong> (envoyée lors de la réservation), <strong>Rappel</strong> (ex : 24h ou 48h avant le RDV), <strong>Annulation</strong> (si le RDV est annulé), <strong>Modification</strong> (si le créneau change). Le contenu de chaque SMS peut être personnalisé." },
+      { q: "Je ne peux pas sélectionner de service ou de destinataire lors de la création d'un RDV", a: "C'est un bug identifié sur certaines configurations. <strong>Contournement</strong> : essayez de saisir le nom du service directement au clavier plutôt que de le sélectionner dans la liste déroulante. Si le problème persiste, contactez le support avec une capture d'écran." },
+      { q: "Comment consulter les statistiques de RDV ?", a: "Le module RDV offre un <strong>reporting</strong> avec : le nombre de créneaux proposés vs réservés, le taux de présence, le nombre d'annulations et de reports, et des statistiques par type de RDV et par période." }
+    ]
+  },
+  {
+    id: 7, title: "Alertes de satisfaction", icon: "🔔",
+    color: "#FEF2F2", iconBg: "#FECACA",
+    items: [
+      { q: "Comment fonctionnent les alertes de satisfaction ?", a: "Les alertes se déclenchent <strong>automatiquement</strong> lorsqu'un locataire donne une note de satisfaction <strong>inférieure au seuil configuré</strong> (par défaut : note ≤ 2/5). Une fiche alerte est créée avec les informations du locataire (nom, coordonnées, résidence, logement) et ses réponses au questionnaire. Un <strong>email de notification</strong> est envoyé aux destinataires configurés (gardien, responsable d'agence, etc.). L'email contient le nom de l'enquête, les informations de l'envoi, un récapitulatif des réponses du locataire, et un bouton <strong>« Voir en détail sur la plateforme »</strong> pour accéder directement à la fiche alerte." },
+      { q: "Comment consulter la liste des alertes sur la plateforme ?", a: "Depuis le menu, allez dans <strong>Enquêtes</strong>, puis cliquez sur <strong>Rapport</strong> et sélectionnez l'onglet <strong>Alertes</strong>. Le tableau de bord affiche en haut : le <strong>% de résolution</strong>, le <strong>total des alertes</strong>, et la répartition par statut (<strong>Non résolu, En cours, Résolu, Non exploitable</strong>). En dessous, la liste détaille chaque alerte avec les colonnes : statut, date de réponse, envoi, nom du locataire, adresse et commentaire opérateur. Utilisez les filtres pour affiner par statut, période, résidence ou gardien." },
+      { q: "Quels sont les différents statuts d'une alerte ?", a: "Une alerte peut avoir 4 statuts : <strong>Non résolu</strong> (statut initial, l'alerte n'a pas encore été prise en charge), <strong>En cours</strong> (un opérateur a commencé le traitement), <strong>Résolu</strong> (le problème est traité et clôturé), <strong>Non exploitable</strong> (l'alerte ne peut pas être traitée, par exemple si le locataire est injoignable ou si la réclamation n'est pas pertinente)." },
+      { q: "Comment traiter une alerte — étape par étape ?", a: "Cliquez sur une alerte pour ouvrir sa fiche détaillée. Celle-ci comporte <strong>3 onglets</strong> :<br><br><strong>1) Suivi opérateur</strong> : affiche la liste des alertes déclenchées pour ce locataire. Changez le statut via le menu déroulant (Non résolu → En cours → Résolu ou Non exploitable). Saisissez un <strong>commentaire opérateur</strong> décrivant l'action entreprise (ex : « Locataire contacté, intervention prévue le 15/03 »). Cliquez sur <strong>Sauvegarder</strong>.<br><br><strong>2) Détails de l'avis</strong> : affiche le questionnaire complet avec toutes les réponses du locataire (questions et notes attribuées), ainsi que les informations de l'envoi (nom de l'enquête, n° d'envoi, type, date d'envoi).<br><br><strong>3) Partager</strong> : permet de transmettre l'alerte à des collaborateurs." },
+      { q: "Comment partager une alerte avec un collaborateur ?", a: "Ouvrez la fiche de l'alerte et cliquez sur l'onglet <strong>Partager</strong>. Sélectionnez un ou plusieurs <strong>destinataires</strong> dans la liste des utilisateurs de la plateforme. Ajoutez un <strong>message opérateur</strong> pour contextualiser l'alerte. Cliquez sur <strong>Partager</strong>. Le destinataire recevra un email avec le détail de l'alerte. Vous pouvez également partager l'alerte sous forme de <strong>PDF</strong> pour des personnes n'ayant pas accès à la plateforme." },
+      { q: "Comment consulter le détail des réponses d'un locataire alerté ?", a: "Ouvrez la fiche alerte et cliquez sur l'onglet <strong>Détails de l'avis</strong>. Vous y trouverez : le <strong>questionnaire complet</strong> avec chaque question et la réponse/note du locataire, les <strong>verbatims</strong> (commentaires libres), et un tableau d'informations indiquant le nom de l'enquête, le numéro de l'envoi, le type d'envoi et la date." },
+      { q: "Je ne reçois pas les notifications d'alertes par email", a: "Vérifiez que votre adresse email est bien <strong>configurée comme destinataire</strong> des alertes (demandez au support de vérifier). Vérifiez votre dossier <strong>spams/courrier indésirable</strong>. L'email d'alerte provient de la plateforme et contient un bouton « Voir en détail sur la plateforme » — si vous ne le trouvez pas, cherchez l'expéditeur Avis-Locataire dans votre boîte. Si vous êtes bien configuré mais ne recevez rien, contactez le support." },
+      { q: "Comment modifier le seuil de déclenchement des alertes ?", a: "Par défaut, une alerte est créée pour toute note ≤ 2/5. Contactez le support pour modifier ce seuil (ex : déclencher pour les notes ≤ 3/5 ou uniquement pour les notes 1/5). Le seuil peut être différencié par type d'enquête." },
+      { q: "Comment ajouter un destinataire aux emails d'alerte ?", a: "Envoyez au support le <strong>nom et email</strong> du nouveau destinataire et précisez le périmètre : toutes les alertes, uniquement celles d'une agence, d'une résidence ou d'un gardien spécifique." },
+      { q: "Comment personnaliser le contenu de l'email d'alerte ?", a: "Le modèle d'email d'alerte peut être personnalisé (logo, texte d'introduction, informations affichées). Envoyez au support le texte souhaité et les éléments à inclure/exclure." },
+      { q: "Que signifie le statut « Non exploitable » ?", a: "Le statut <strong>Non exploitable</strong> est utilisé lorsqu'une alerte ne peut pas être traitée de manière productive : locataire injoignable après plusieurs tentatives, réclamation hors périmètre, doublon, ou réponse manifestement incohérente. Ce statut permet de clôturer l'alerte sans la comptabiliser comme « Résolue » dans les statistiques." }
+    ]
+  },
+  {
+    id: 8, title: "Module Réclamations", icon: "📝",
+    color: "#ECFDF5", iconBg: "#A7F3D0",
+    items: [
+      { q: "Comment créer une réclamation ?", a: "Depuis le menu <strong>Réclamations</strong>, cliquez sur <strong>Nouvelle réclamation</strong>. Renseignez : le <strong>locataire</strong> (recherchez par nom ou adresse), l'<strong>objet</strong> de la réclamation, la <strong>catégorie</strong> (technique, propreté, voisinage, etc.), une <strong>description détaillée</strong>, et éventuellement des <strong>pièces jointes</strong> (photos). Validez pour créer la réclamation avec le statut « Ouverte »." },
+      { q: "Quels sont les statuts d'une réclamation ?", a: "Le workflow de réclamation suit ces étapes : <strong>Ouverte</strong> (réclamation créée), <strong>En cours de traitement</strong> (prise en charge par un gestionnaire), <strong>Résolue</strong> (problème traité), <strong>Fermée</strong> (clôture définitive). Chaque changement de statut peut être accompagné d'un commentaire et, si configuré, d'un <strong>SMS automatique au locataire</strong> pour l'informer de l'avancement." },
+      { q: "Peut-on notifier le locataire par SMS lors du changement de statut ?", a: "Oui. Le paramétrage des notifications SMS à chaque changement de statut est configurable. Contactez le support pour activer les notifications souhaitées (ex : SMS quand la réclamation passe de « Ouverte » à « En cours », et de « En cours » à « Résolue »). Le contenu du SMS peut être personnalisé." },
+      { q: "Comment assigner une réclamation à un collaborateur ?", a: "Ouvrez la fiche de la réclamation et utilisez le champ <strong>Assigné à</strong> pour sélectionner un collaborateur dans la liste. Ce dernier recevra une notification et verra la réclamation dans son tableau de bord." },
+      { q: "Comment consulter l'historique des réclamations ?", a: "Le module Réclamations offre une vue liste avec des <strong>filtres</strong> par statut, catégorie, période, résidence et gestionnaire. Chaque fiche réclamation conserve l'<strong>historique complet</strong> : date de création, changements de statut, commentaires ajoutés, pièces jointes." }
+    ]
+  },
+  {
+    id: 9, title: "Extractions et exports", icon: "📤",
+    color: "#FFF7ED", iconBg: "#FED7AA",
+    items: [
+      { q: "Comment exporter des données depuis la plateforme ?", a: "La plupart des modules disposent d'un bouton <strong>Exporter</strong> (icône de téléchargement). Les exports sont générés au format <strong>Excel (.xlsx)</strong>. Vous pouvez exporter : les résultats d'enquêtes, la liste des alertes, les réclamations, les RDV, les statistiques de communication. Les filtres actifs au moment de l'export sont appliqués au fichier généré." },
+      { q: "Comment obtenir une extraction de données personnalisée ?", a: "Si l'export standard ne couvre pas votre besoin, contactez le support en précisant : le <strong>module concerné</strong> (enquêtes, alertes, réclamations…), la <strong>période souhaitée</strong>, les <strong>champs/colonnes</strong> à inclure, le <strong>format</strong> attendu (Excel, CSV), et les <strong>filtres</strong> à appliquer." },
+      { q: "Les données de mon extraction semblent incomplètes", a: "Vérifiez la <strong>période sélectionnée</strong> dans les filtres (elle peut être trop restrictive). Vérifiez qu'aucun autre filtre (agence, résidence) ne limite les résultats. Si le problème persiste, contactez le support avec une capture d'écran des filtres appliqués et du résultat obtenu." },
+      { q: "Comment automatiser l'envoi régulier d'extractions ?", a: "Des <strong>flux automatiques</strong> peuvent être mis en place pour recevoir des extractions à intervalles réguliers (hebdomadaire, mensuel). Les fichiers peuvent être déposés sur votre <strong>serveur FTP</strong> ou envoyés par <strong>email</strong>. Contactez le support pour configurer la fréquence, le contenu et le canal de livraison." },
+      { q: "Peut-on automatiser la transmission des résultats aux prestataires ?", a: "Oui, des <strong>envois automatiques de résultats d'enquêtes</strong> peuvent être configurés à destination de vos prestataires (entreprises de nettoyage, de maintenance, etc.). Contactez le support pour définir le périmètre (quels prestataires, quelles enquêtes) et la fréquence." }
+    ]
+  },
+  {
+    id: 10, title: "Reporting et statistiques", icon: "📈",
+    color: "#F5F3FF", iconBg: "#C4B5FD",
+    items: [
+      { q: "Comment accéder au reporting ?", a: "Le menu <strong>Reporting</strong> donne accès à des tableaux de bord avancés : évolution de la satisfaction dans le temps, comparaisons entre agences/résidences, taux de réponse, NPS, analyse des verbatims. Les graphiques sont interactifs et peuvent être filtrés par période, agence, résidence, gardien ou prestataire." },
+      { q: "L'onglet Suivi affiche des résultats incohérents entre les vues", a: "Des écarts entre la vue <strong>Mensuelle</strong> et la vue <strong>Par envoi</strong> peuvent apparaître car le mode de calcul diffère : la vue mensuelle agrège par mois calendaire, tandis que la vue par envoi suit chaque campagne individuelle. Si l'écart semble anormal, signalez-le au support avec des <strong>captures d'écran</strong> des deux vues." },
+      { q: "Comment comparer les résultats entre résidences ou agences ?", a: "Dans l'onglet <strong>Résultats</strong>, utilisez les filtres pour sélectionner les entités à comparer. Les graphiques de satisfaction et les scores se mettront à jour en conséquence. Pour une comparaison plus poussée, demandez un <strong>export Excel</strong> ou un <strong>rapport personnalisé</strong> au support." },
+      { q: "Comment analyser les verbatims des locataires ?", a: "L'onglet <strong>Résultats > Verbatims</strong> liste tous les commentaires libres des locataires. Vous pouvez les filtrer par <strong>note</strong> (ex : ne voir que les verbatims des notes 1 et 2 pour identifier les insatisfactions), par <strong>résidence</strong> ou par <strong>période</strong>. Les verbatims peuvent être exportés en Excel pour une analyse approfondie." }
+    ]
+  },
+  {
+    id: 11, title: "Chantiers IRIS / Léon Grosse", icon: "🏗️",
+    color: "#F0F9FF", iconBg: "#BAE6FD",
+    items: [
+      { q: "Comment demander la création d'un chantier dans Collecte ?", a: "Remplissez le <strong>formulaire de demande IRIS</strong> avec : le nom du demandeur, l'entité, les coordonnées, l'affaire/opération concernée et les détails du chantier (adresse, nombre de logements, type d'intervention). Envoyez-le au support qui procédera à la création dans l'application Collecte." },
+      { q: "Comment intégrer un quittus dans un chantier ?", a: "Envoyez le fichier quittus au support en précisant le <strong>nom du chantier</strong> et les <strong>opérateurs</strong> à qui l'assigner. Le quittus sera intégré et les opérateurs pourront le consulter et le compléter depuis l'application Collecte." },
+      { q: "La synchronisation d'un chantier a échoué — les données sont-elles perdues ?", a: "Contactez le support <strong>immédiatement</strong> avec les captures d'écran des logements/inspections concernés. Dans la plupart des cas, les données sont <strong>récupérables côté serveur</strong> ou restent stockées localement sur l'appareil tant que l'application n'est pas réinstallée. Ne désinstallez pas l'application avant d'avoir contacté le support." }
+    ]
+  },
+  {
+    id: 12, title: "Base locataires et patrimoine", icon: "🏠",
+    color: "#FFF7ED", iconBg: "#FDBA74",
+    items: [
+      { q: "Comment mettre à jour la base locataires ?", a: "Préparez votre fichier Excel avec les données locataires à jour (nom, prénom, téléphone, email, n° de logement, résidence). Déposez-le sur le <strong>serveur FTP</strong> ou envoyez-le par email au support. Précisez s'il s'agit d'un <strong>remplacement complet</strong> (toute la base est remplacée) ou d'un <strong>ajout/mise à jour</strong> (seuls les nouveaux/modifiés sont traités)." },
+      { q: "Un patrimoine ou logement n'apparaît pas sur la plateforme", a: "Vérifiez que le logement est bien présent dans le <strong>dernier fichier de synchronisation</strong> déposé sur le FTP. Si oui, contactez le support pour <strong>forcer la réintégration</strong>. Le problème peut venir d'un format de données incorrect ou d'un identifiant manquant." },
+      { q: "La géolocalisation d'un patrimoine est erronée sur la carte", a: "Signalez l'adresse incorrecte au support avec l'<strong>adresse exacte</strong> et, si possible, les <strong>coordonnées GPS</strong> correctes. La correction sera effectuée manuellement dans la base de données." },
+      { q: "Comment structurer le fichier patrimoine pour l'import ?", a: "Le fichier doit contenir au minimum : <strong>référence unique</strong> du logement, <strong>résidence</strong> (nom et/ou code), <strong>bâtiment</strong>, <strong>étage</strong>, <strong>numéro de porte</strong>, <strong>adresse complète</strong>, et éventuellement l'<strong>agence</strong> et le <strong>gardien</strong> rattachés. Contactez le support pour obtenir un <strong>fichier modèle</strong>." }
+    ]
+  },
+  {
+    id: 13, title: "Facturation et contrat", icon: "💰",
+    color: "#ECFDF5", iconBg: "#6EE7B7",
+    items: [
+      { q: "Comment obtenir ma facture ?", a: "Les factures sont envoyées selon les termes de votre contrat (mensuel, trimestriel ou annuel). Pour toute question sur la facturation, contactez le support ou votre <strong>interlocuteur commercial</strong> dédié." },
+      { q: "Comment demander un devis pour un nouveau service ou module ?", a: "Envoyez votre demande au support ou à votre contact commercial en décrivant le <strong>besoin</strong> (nouveau module, volume supplémentaire de SMS, enquêtes spécifiques, etc.). Un devis vous sera transmis sous 48h." }
+    ]
+  },
+  {
+    id: 14, title: "Formation et prise en main", icon: "🎓",
+    color: "#EFF6FF", iconBg: "#93C5FD",
+    items: [
+      { q: "Comment organiser une formation sur la plateforme ?", a: "Contactez le support pour planifier une <strong>visio de formation</strong> (Teams, Zoom ou Google Meet). Des sessions peuvent être organisées sur : la plateforme web (enquêtes, résultats, reporting), l'application Collecte (inspections terrain), le module Communication (campagnes SMS/email), le module RDV, ou le module Réclamations. Les sessions durent généralement 1h à 1h30." },
+      { q: "Existe-t-il des guides d'utilisation ?", a: "Oui, des guides PDF détaillés sont disponibles pour chaque module : <strong>Guide Utilisateurs AL</strong> (plateforme web complète), <strong>Guide Collecte</strong> (application mobile), <strong>Guide Gestion des Alertes</strong>, <strong>Guide RDV</strong>. Contactez le support pour recevoir les guides adaptés à votre configuration." },
+      { q: "Comment former un nouvel utilisateur ?", a: "Pour un nouvel utilisateur : <strong>1)</strong> Demandez la création de son compte au support. <strong>2)</strong> Transmettez-lui le guide utilisateur adapté à son rôle. <strong>3)</strong> Planifiez une session de formation personnalisée si nécessaire. <strong>4)</strong> Le support reste disponible pour répondre à ses questions pendant sa prise en main." }
+    ]
+  }
+];
+
+let activeCategory = null;
+let searchQuery = '';
+
+function normalize(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function highlightText(text, query) {
+  if (!query) return text;
+  const norm = normalize(text);
+  const normQ = normalize(query);
+  let result = '';
+  let lastIdx = 0;
+  let idx = norm.indexOf(normQ);
+  while (idx !== -1) {
+    result += text.slice(lastIdx, idx) + '<mark>' + text.slice(idx, idx + query.length) + '</mark>';
+    lastIdx = idx + query.length;
+    idx = norm.indexOf(normQ, lastIdx);
+  }
+  result += text.slice(lastIdx);
+  return result;
+}
+
+function renderCategories() {
+  const nav = document.getElementById('categoriesNav');
+  let html = '<div class="cat-pill' + (activeCategory === null ? ' active' : '') + '" data-cat="all">Tout <span class="count">' + faqData.reduce((s, c) => s + c.items.length, 0) + '</span></div>';
+  faqData.forEach(cat => {
+    html += '<div class="cat-pill' + (activeCategory === cat.id ? ' active' : '') + '" data-cat="' + cat.id + '">' + cat.icon + ' ' + cat.title + ' <span class="count">' + cat.items.length + '</span></div>';
+  });
+  nav.innerHTML = html;
+  nav.querySelectorAll('.cat-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const catId = pill.dataset.cat;
+      activeCategory = catId === 'all' ? null : parseInt(catId);
+      render();
+    });
+  });
+}
+
+function render() {
+  const query = searchQuery;
+  const normQ = normalize(query);
+  const container = document.getElementById('faqContent');
+  let totalMatches = 0;
+  let html = '';
+
+  faqData.forEach(cat => {
+    if (activeCategory !== null && cat.id !== activeCategory) return;
+
+    const matchingItems = cat.items.filter(item => {
+      if (!normQ) return true;
+      return normalize(item.q).includes(normQ) || normalize(item.a.replace(/<[^>]*>/g, '')).includes(normQ);
+    });
+
+    if (matchingItems.length === 0) return;
+    totalMatches += matchingItems.length;
+
+    html += '<div class="section" data-section="' + cat.id + '">';
+    html += '<div class="section-header">';
+    html += '<div class="section-icon" style="background:' + cat.iconBg + '">' + cat.icon + '</div>';
+    html += '<div class="section-title">' + cat.title + '</div>';
+    html += '<div class="section-count">' + matchingItems.length + ' question' + (matchingItems.length > 1 ? 's' : '') + '</div>';
+    html += '</div>';
+
+    matchingItems.forEach((item, i) => {
+      const isMatch = normQ && (normalize(item.q).includes(normQ) || normalize(item.a.replace(/<[^>]*>/g, '')).includes(normQ));
+      const openClass = normQ ? ' open' : '';
+      const hlClass = isMatch ? ' highlight' : '';
+      html += '<div class="faq-item' + openClass + hlClass + '" data-idx="' + cat.id + '-' + i + '">';
+      html += '<div class="faq-question">';
+      html += '<span class="q-icon">Q</span>';
+      html += '<span class="q-text">' + (normQ ? highlightText(item.q, query) : item.q) + '</span>';
+      html += '<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+      html += '</div>';
+      html += '<div class="faq-answer"><div class="faq-answer-inner">' + (normQ ? highlightText(item.a, query) : item.a) + '</div></div>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+  });
+
+  if (totalMatches === 0 && normQ) {
+    html = '<div class="no-results"><div class="emoji">🔍</div><p>Aucun résultat pour « ' + query + ' »</p><p style="margin-top:0.5rem;font-size:0.85rem">Essayez avec d\'autres mots-clés</p></div>';
+  }
+
+  container.innerHTML = html;
+
+  const stats = document.getElementById('searchStats');
+  if (normQ) {
+    stats.textContent = totalMatches + ' résultat' + (totalMatches > 1 ? 's' : '') + ' trouvé' + (totalMatches > 1 ? 's' : '');
+  } else {
+    stats.textContent = '';
+  }
+
+  container.querySelectorAll('.faq-question').forEach(q => {
+    q.addEventListener('click', () => {
+      q.parentElement.classList.toggle('open');
+    });
+  });
+
+  renderCategories();
+}
+
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+let debounceTimer;
+
+searchInput.addEventListener('input', () => {
+  clearBtn.classList.toggle('visible', searchInput.value.length > 0);
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    searchQuery = searchInput.value.trim();
+    render();
+  }, 200);
+});
+
+clearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  searchQuery = '';
+  clearBtn.classList.remove('visible');
+  render();
+  searchInput.focus();
+});
+
+render();
+</script>
+</body>
+</html>
